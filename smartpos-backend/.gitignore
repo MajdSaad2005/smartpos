@@ -1,0 +1,49 @@
+# Backend .gitignore
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+*.class
+*.jar
+*.war
+*.rar
+*.ear
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# Spring Boot
+application-dev.properties
+application-prod.properties
+
+# Database
+*.db
+*.sqlite
