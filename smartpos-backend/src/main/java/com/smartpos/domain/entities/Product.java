@@ -55,5 +55,5 @@ public class Product {
     private Set<TicketLine> ticketLines = new HashSet<>();
     
     @OneToMany(mappedBy = "product")
-    private Set<TicketStock> ticketStocks = new HashSet<>();
+    private Set<StockMovement> stockMovements = new HashSet<>();
 }

@@ -39,6 +39,9 @@ public class CloseCash {
     @Column(nullable = false)
     private Boolean reconciled = false;
     
+    @Column(length = 255)
+    private String cashierName;
+    
     @OneToMany(mappedBy = "closeCash")
     private Set<Ticket> tickets = new HashSet<>();
 }

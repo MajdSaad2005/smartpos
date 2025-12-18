@@ -21,8 +21,8 @@ public class CloseCashController {
     
     @PostMapping("/open")
     @Operation(summary = "Open a new cash closing session")
-    public ResponseEntity<CloseCashDTO> openCloseCash() {
-        return ResponseEntity.status(HttpStatus.CREATED).body(closeCashService.openCloseCash());
+    public ResponseEntity<CloseCashDTO> openCloseCash(@RequestParam(required = false) String cashierName) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(closeCashService.openCloseCash(cashierName));
     }
     
     @PostMapping("/{id}/close")

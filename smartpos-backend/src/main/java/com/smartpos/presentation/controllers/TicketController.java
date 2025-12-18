@@ -3,6 +3,7 @@ package com.smartpos.presentation.controllers;
 import com.smartpos.application.dtos.TicketDTO;
 import com.smartpos.application.dtos.CreateTicketRequest;
 import com.smartpos.application.services.TicketService;
+import com.smartpos.application.services.ReportingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.List;
 public class TicketController {
     
     private final TicketService ticketService;
+    private final ReportingService reportingService;
     
     @PostMapping
     @Operation(summary = "Create a new ticket (sale or return)")
@@ -66,4 +68,52 @@ public class TicketController {
         ticketService.cancelTicket(id);
         return ResponseEntity.noContent().build();
     }
+    
+    /**
+     * Recalculate Ticket Totals
+     * Demonstrates EXPLICIT SQL TRANSACTION CONTROL (BEGIN, COMMIT, ROLLBACK)
+     * 
+     * Use case: Fix data inconsistencies or recalculate after manual database updates
+     * This endpoint uses raw SQL transaction commands instead of Spring's @Transactional
+     */
+    @PostMapping("/{id}/recalculate")
+    @Operation(summary = "Recalculate ticket totals using explicit SQL transactions (BEGIN/COMMIT/ROLLBACK)")
+    public ResponseEntity<String> recalculateTicket(@PathVariable Long id) {
+        boolean success = reportingService.recalculateTicketTotalsWithExplicitTransaction(id);
+        if (success) {
+            return ResponseEntity.ok("Ticket totals recalculated successfully using explicit transaction control");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Ticket not found - transaction was rolled back");
+        }
+    }
+    
+    /**
+     * Bulk Inventory Adjustment Endpoint
+     * Demonstrates TRANSACTIONAL operation with ACID properties
+     * 
+     * Request body example:
+     * {
+     *   "adjustments": {
+     *     "1": 10,   // Add 10 units to product ID 1
+     *     "2": -5    // Remove 5 units from product ID 2
+     *   },
+     *   "reason": "Physical inventory count correction"
+     * }
+     */
+    @PostMapping("/bulk-adjustment")
+    @Operation(summary = "Perform bulk inventory adjustment (Transactional)")
+    public ResponseEntity<TicketDTO> bulkAdjustment(@RequestBody java.util.Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Integer> adjustmentsRaw = (java.util.Map<String, Integer>) request.get("adjustments");
+        String reason = (String) request.get("reason");
+        
+        // Convert String keys to Long
+        java.util.Map<Long, Integer> adjustments = new java.util.HashMap<>();
+        adjustmentsRaw.forEach((k, v) -> adjustments.put(Long.parseLong(k), v));
+        
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ticketService.performBulkInventoryAdjustment(adjustments, reason));
+    }
 }
+

@@ -70,6 +70,7 @@ export interface CloseCash {
   totalReturns: number;
   netAmount: number;
   reconciled: boolean;
+  cashierName?: string;
 }
 
 export interface StockLevel {
@@ -113,6 +114,9 @@ export interface CreateCustomerRequest {
 export interface CreateTicketLineRequest {
   productId: number;
   quantity: number;
+  isDefective?: boolean; // For returns - mark as defective
+  discountAmount?: number; // Discount for this line
+  couponCode?: string; // Coupon code if applicable
 }
 
 export interface CreateTicketRequest {
@@ -120,4 +124,152 @@ export interface CreateTicketRequest {
   customerId: number | null;
   notes?: string;
   lines: CreateTicketLineRequest[];
+  couponCode?: string;
+  discountId?: number;
+}
+
+export enum DiscountType {
+  PERCENTAGE = 'PERCENTAGE',
+  FIXED_AMOUNT = 'FIXED_AMOUNT'
+}
+
+export enum ApplicableOn {
+  TOTAL = 'TOTAL',
+  PRODUCT_CATEGORY = 'PRODUCT_CATEGORY',
+  SPECIFIC_PRODUCT = 'SPECIFIC_PRODUCT'
+}
+
+export interface Coupon {
+  id: number;
+  code: string;
+  description: string;
+  discountType: DiscountType;
+  discountValue: number;
+  minimumPurchaseAmount?: number;
+  maximumDiscountAmount?: number;
+  validFrom: string;
+  validUntil: string;
+  active: boolean;
+  maxUsageCount?: number;
+  currentUsageCount: number;
+  createdAt: string;
+}
+
+export interface Discount {
+  id: number;
+  name: string;
+  description?: string;
+  discountType: DiscountType;
+  discountValue: number;
+  applicableOn: ApplicableOn;
+  applicableProductId?: number;
+  minimumPurchaseAmount?: number;
+  maximumDiscountAmount?: number;
+  validFrom: string;
+  validUntil: string;
+  active: boolean;
+  requiresCustomer: boolean;
+  createdAt: string;
+}
+
+export interface CreateCouponRequest {
+  code: string;
+  description: string;
+  discountType: DiscountType;
+  discountValue: number;
+  minimumPurchaseAmount?: number;
+  maximumDiscountAmount?: number;
+  validFrom: string;
+  validUntil: string;
+  active: boolean;
+  maxUsageCount?: number;
+}
+
+export interface CreateDiscountRequest {
+  name: string;
+  description?: string;
+  discountType: DiscountType;
+  discountValue: number;
+  applicableOn: ApplicableOn;
+  applicableProductId?: number;
+  minimumPurchaseAmount?: number;
+  maximumDiscountAmount?: number;
+  validFrom: string;
+  validUntil: string;
+  active: boolean;
+  requiresCustomer: boolean;
+}
+
+// Reporting Types
+export interface SalesReportDTO {
+  ticketId: number;
+  ticketNumber: string;
+  createdAt: string;
+  customerName: string;
+  total: number;
+  cashierName: string;
+  itemCount: number;
+}
+
+export interface ProductSalesStatsDTO {
+  productId: number;
+  productCode: string;
+  productName: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+  averagePrice: number;
+  transactionCount: number;
+}
+
+export interface CustomerPurchaseSummaryDTO {
+  customerId: number;
+  customerCode: string;
+  customerName: string;
+  totalPurchases: number;
+  totalSpent: number;
+  averageTransactionValue: number;
+}
+
+// Purchase Order Types
+export interface PurchaseOrder {
+  id: number;
+  orderNumber: string;
+  supplierId: number;
+  supplierName: string;
+  status: 'PENDING' | 'ORDERED' | 'RECEIVED' | 'CANCELLED';
+  orderDate: string;
+  expectedDeliveryDate?: string;
+  receivedDate?: string;
+  subtotal: number;
+  taxAmount: number;
+  total: number;
+  notes?: string;
+  lines: PurchaseOrderLine[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface PurchaseOrderLine {
+  id: number;
+  productId: number;
+  productName: string;
+  productCode: string;
+  quantityOrdered: number;
+  quantityReceived: number;
+  unitCost: number;
+  lineTotal: number;
+  taxPercentage?: number;
+  taxAmount?: number;
+}
+
+export interface CreatePurchaseOrderRequest {
+  supplierId: number;
+  expectedDeliveryDate?: string;
+  notes?: string;
+  lines: CreatePurchaseOrderLineRequest[];
+}
+
+export interface CreatePurchaseOrderLineRequest {
+  productId: number;
+  quantity: number;
 }

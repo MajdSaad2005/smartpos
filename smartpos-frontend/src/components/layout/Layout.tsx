@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiMenu, FiX, FiDollarSign, FiBox, FiUsers, FiShoppingCart, FiBarChart2, FiSettings, FiPackage } from 'react-icons/fi';
+import { FiMenu, FiX, FiDollarSign, FiBox, FiUsers, FiShoppingCart, FiBarChart2, FiSettings, FiPackage, FiTrendingUp, FiTag, FiShoppingBag } from 'react-icons/fi';
 import clsx from 'clsx';
 
 const menuItems = [
@@ -12,14 +12,37 @@ const menuItems = [
   { href: '/sales', label: 'Sales', icon: FiShoppingCart },
   { href: '/products', label: 'Products', icon: FiBox },
   { href: '/inventory', label: 'Inventory', icon: FiPackage },
+  { href: '/purchase-orders', label: 'Purchase Orders', icon: FiShoppingBag },
   { href: '/customers', label: 'Customers', icon: FiUsers },
   { href: '/suppliers', label: 'Suppliers', icon: FiUsers },
+  { href: '/coupons', label: 'Coupons', icon: FiTag },
+  { href: '/discounts', label: 'Discounts', icon: FiTag },
+  { href: '/reports', label: 'Reports', icon: FiTrendingUp },
   { href: '/settings', label: 'Settings', icon: FiSettings },
 ];
 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleLinkClick = () => {
+    // Only close sidebar on mobile screens
+    if (isMobile) {
+      setIsOpen(false);
+    }
+  };
 
   return (
     <>
@@ -56,7 +79,7 @@ export const Sidebar: React.FC = () => {
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
                   isActive ? 'bg-blue-600 text-white shadow-lg scale-[1.02]' : 'text-gray-300 hover:bg-gray-800 hover:translate-x-1'
                 )}
-                onClick={() => setIsOpen(false)}
+                onClick={handleLinkClick}
               >
                 <Icon size={20} className={clsx(isActive ? 'animate-pulse' : '')} />
                 <span className="font-medium tracking-wide">{item.label}</span>

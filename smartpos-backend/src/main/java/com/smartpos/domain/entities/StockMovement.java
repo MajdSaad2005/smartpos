@@ -6,13 +6,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ticket_stocks")
+@Table(name = "stock_movements")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TicketStock {
+public class StockMovement {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,14 +29,24 @@ public class TicketStock {
     @Column(nullable = false)
     private Integer quantity;
     
+    // Positive for purchase/return, negative for sale
+    @Column(nullable = false)
+    private Integer quantityChange;
+    
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private StockMovementType type; // INCREASE, DECREASE
+    private MovementType type; // SALE, RETURN, ADJUSTMENT
+    
+    @Column(nullable = false)
+    private Boolean hasQuantityChanged;
     
     @Column(nullable = false)
     private LocalDateTime createdAt;
     
-    public enum StockMovementType {
-        INCREASE, DECREASE
+    @Column(nullable = false)
+    private Boolean isDefective = false;
+    
+    public enum MovementType {
+        SALE, RETURN, ADJUSTMENT
     }
 }

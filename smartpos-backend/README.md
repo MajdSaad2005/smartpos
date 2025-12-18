@@ -198,7 +198,7 @@ The Flyway migration creates the following main tables:
 - **customers** - Customer database
 - **tickets** - Sales and return transactions
 - **ticket_lines** - Individual items in transactions
-- **ticket_stocks** - Stock movements (increases/decreases)
+- **stock_movements** - Stock movements (increases/decreases)
 - **close_cash** - Cash register sessions
 
 ## Key Features

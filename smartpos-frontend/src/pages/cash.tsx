@@ -18,6 +18,8 @@ export default function CashPage() {
     totalReturns: 0,
     netAmount: 0
   });
+  const [showOpenDialog, setShowOpenDialog] = useState(false);
+  const [cashierName, setCashierName] = useState('');
 
   const calculateSessionTotals = (sessionTickets: Ticket[]) => {
     const totals = {
@@ -75,9 +77,16 @@ export default function CashPage() {
   }, []);
 
   const handleOpenCash = async () => {
+    if (!cashierName.trim()) {
+      alert('Please enter cashier name');
+      return;
+    }
+    
     try {
-      await closeCashAPI.open();
+      await closeCashAPI.open(cashierName);
       await loadData(true);
+      setShowOpenDialog(false);
+      setCashierName('');
     } catch (error: any) {
       alert(`Failed to open cash: ${error.response?.data?.message || error.message}`);
     }
@@ -142,7 +151,7 @@ export default function CashPage() {
                     <FiLock /> Close Cash
                   </Button>
                 ) : (
-                  <Button onClick={handleOpenCash} variant="primary" className="flex items-center gap-2">
+                  <Button onClick={() => setShowOpenDialog(true)} variant="primary" className="flex items-center gap-2">
                     <FiUnlock /> Open Cash
                   </Button>
                 )}
@@ -151,6 +160,14 @@ export default function CashPage() {
 
             {activeSession ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                {activeSession.cashierName && (
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600">Cashier</div>
+                    <div className="text-lg font-bold text-gray-900">
+                      {activeSession.cashierName}
+                    </div>
+                  </div>
+                )}
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="text-sm text-gray-600">Opened At</div>
                   <div className="text-lg font-bold text-gray-900">
@@ -250,6 +267,39 @@ export default function CashPage() {
             )}
           </Card>
         </div>
+
+        {/* Open Cash Dialog */}
+        {showOpenDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-bold mb-4">Open Cash Session</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cashier Name
+                </label>
+                <input
+                  type="text"
+                  value={cashierName}
+                  onChange={(e) => setCashierName(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your name"
+                  autoFocus
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') handleOpenCash();
+                  }}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button onClick={() => { setShowOpenDialog(false); setCashierName(''); }} variant="secondary">
+                  Cancel
+                </Button>
+                <Button onClick={handleOpenCash} variant="primary">
+                  Open Cash
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Content>
     </Layout>
   );

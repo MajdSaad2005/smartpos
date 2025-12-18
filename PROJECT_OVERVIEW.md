@@ -177,14 +177,14 @@ The backend follows DDD principles with clear separation of concerns:
 
 6. **Ticket** - Sales/Return transactions
    - Fields: number, type, status, subtotal, taxAmount, total
-   - Relationships: has Supplier, may have Customer, has many TicketLines, has many TicketStocks
+   - Relationships: has Supplier, may have Customer, has many TicketLines, has many StockMovements
 
 7. **TicketLine** - Individual items in transaction
    - Fields: product_id, quantity, unitPrice, lineTotal, taxAmount
    - Relationships: belongs to Ticket and Product
 
-8. **TicketStock** - Stock movements
-   - Fields: product_id, quantity, type (INCREASE/DECREASE)
+8. **StockMovement** - Stock movements
+   - Fields: product_id, quantity, type (SALE, RETURN, ADJUSTMENT)
    - Relationships: belongs to Ticket and Product
 
 9. **CloseCash** - Cash register sessions

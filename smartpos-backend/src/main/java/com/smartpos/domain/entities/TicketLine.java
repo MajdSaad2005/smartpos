@@ -40,4 +40,15 @@ public class TicketLine {
     
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal taxAmount;
+    
+    @Column(precision = 19, scale = 2)
+    private BigDecimal discountAmount;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discount_id")
+    private Discount discount;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
 }

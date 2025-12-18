@@ -56,7 +56,7 @@ public class Ticket {
     private Set<TicketLine> lines = new HashSet<>();
     
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TicketStock> stocks = new HashSet<>();
+    private Set<StockMovement> stockMovements = new HashSet<>();
     
     public enum TicketType {
         SALE, RETURN

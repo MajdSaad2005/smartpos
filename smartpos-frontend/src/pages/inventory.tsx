@@ -5,12 +5,12 @@ import { useForm } from 'react-hook-form';
 import { Layout, Header, Content } from '@/components/layout/Layout';
 import { DataTable } from '@/components/common/DataTable';
 import { Card, Button, Input, Select } from '@/components/common/FormElements';
-import { Product, CreateTicketLineRequest } from '@/types/api';
-import { productAPI } from '@/lib/api';
+import { Product, Supplier } from '@/types/api';
+import { productAPI, supplierAPI, purchaseOrderAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { ticketAPI } from '@/lib/api';
 
 interface StockAdjustmentForm {
+  supplierId: string;
   productId: string;
   quantity: number;
   notes: string;
@@ -18,6 +18,7 @@ interface StockAdjustmentForm {
 
 export default function Inventory() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +31,7 @@ export default function Inventory() {
 
   useEffect(() => {
     fetchProducts();
+    fetchSuppliers();
   }, []);
 
   const fetchProducts = async () => {
@@ -41,40 +43,53 @@ export default function Inventory() {
     }
   };
 
+  const fetchSuppliers = async () => {
+    try {
+      const response = await supplierAPI.getAll();
+      setSuppliers(response.data.filter(s => s.active));
+    } catch (error) {
+      toast.error('Failed to load suppliers');
+    }
+  };
+
   const onSubmit = async (data: StockAdjustmentForm) => {
-    if (!data.productId || data.quantity <= 0) {
-      toast.error('Please select a product and enter a valid quantity');
+    if (!data.supplierId || !data.productId || data.quantity <= 0) {
+      toast.error('Please select a supplier, product, and enter a valid quantity');
       return;
     }
 
     setLoading(true);
     try {
       const product = products.find(p => p.id === parseInt(data.productId));
-      if (!product) {
-        toast.error('Product not found');
+      const supplier = suppliers.find(s => s.id === parseInt(data.supplierId));
+      
+      if (!product || !supplier) {
+        toast.error('Product or supplier not found');
         return;
       }
 
-      // Create a RETURN ticket to increase stock
-      const ticketData = {
-        type: 'RETURN',
-        customerId: null,
+      // Create purchase order and receive it immediately
+      const purchaseOrder = await purchaseOrderAPI.create({
+        supplierId: parseInt(data.supplierId),
+        notes: data.notes || `Stock replenishment for ${product.name}`,
         lines: [
           {
             productId: parseInt(data.productId),
             quantity: data.quantity,
           },
-        ] as CreateTicketLineRequest[],
-      };
+        ],
+      });
 
-      await ticketAPI.create(ticketData as any);
-      toast.success(`Added ${data.quantity} units to ${product.name}`);
+      // Immediately receive the order to update stock
+      await purchaseOrderAPI.receive(purchaseOrder.data.id);
+      
+      toast.success(`Added ${data.quantity} units of ${product.name} from ${supplier.name}`);
       setShowModal(false);
       reset();
       fetchProducts();
     } catch (error: any) {
       console.error('Stock adjustment error:', error);
-      toast.error(error.response?.data?.message || 'Failed to adjust stock');
+      toast.error(error.response?.data?.message || 'Failed to add stock');
     } finally {
       setLoading(false);
     }
@@ -94,8 +109,21 @@ export default function Inventory() {
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <Card className="w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Add Stock</h3>
+              <h3 className="text-lg font-semibold mb-4">Add Stock from Supplier</h3>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <Select
+                  label="Supplier"
+                  {...register('supplierId', { required: 'Supplier is required' })}
+                  error={errors.supplierId?.message as string}
+                  options={[
+                    { value: '', label: 'Select a supplier...' },
+                    ...suppliers.map(s => ({
+                      value: s.id.toString(),
+                      label: s.name,
+                    })),
+                  ]}
+                />
+
                 <Select
                   label="Product"
                   {...register('productId', { required: 'Product is required' })}

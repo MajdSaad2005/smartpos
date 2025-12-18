@@ -18,4 +18,5 @@ public class CloseCashDTO {
     private BigDecimal totalReturns;
     private BigDecimal netAmount;
     private Boolean reconciled;
+    private String cashierName;
 }

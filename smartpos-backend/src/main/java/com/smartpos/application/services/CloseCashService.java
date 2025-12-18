@@ -22,7 +22,7 @@ public class CloseCashService {
     private final CloseCashRepository closeCashRepository;
     private final TicketRepository ticketRepository;
     
-    public CloseCashDTO openCloseCash() {
+    public CloseCashDTO openCloseCash(String cashierName) {
         CloseCash closeCash = CloseCash.builder()
                 .openedAt(LocalDateTime.now())
                 .closedAt(null)
@@ -30,6 +30,7 @@ public class CloseCashService {
                 .totalReturns(BigDecimal.ZERO)
                 .netAmount(BigDecimal.ZERO)
                 .reconciled(false)
+                .cashierName(cashierName)
                 .build();
         
         closeCash = closeCashRepository.save(closeCash);
@@ -102,6 +103,7 @@ public class CloseCashService {
                 .totalReturns(closeCash.getTotalReturns())
                 .netAmount(closeCash.getNetAmount())
                 .reconciled(closeCash.getReconciled())
+                .cashierName(closeCash.getCashierName())
                 .build();
     }
 }
