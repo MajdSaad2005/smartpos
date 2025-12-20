@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Builder
 public class CreateProductRequest {
     private String code;
+    private String barcode;
     private String name;
     private String description;
     private BigDecimal purchasePrice;

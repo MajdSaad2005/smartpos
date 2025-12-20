@@ -2,6 +2,7 @@
 export interface Product {
   id: number;
   code: string;
+  barcode?: string;
   name: string;
   description: string;
   purchasePrice: number;
@@ -73,6 +74,16 @@ export interface CloseCash {
   cashierName?: string;
 }
 
+export interface DashboardStats {
+  saleDate: string;
+  sessionId: number | null;
+  totalSales: number;
+  totalReturns: number;
+  netProfit: number;
+  transactionCount: number;
+  netAmount: number;
+}
+
 export interface StockLevel {
   id: number;
   productId: number;
@@ -84,6 +95,7 @@ export interface StockLevel {
 // Request Types
 export interface CreateProductRequest {
   code: string;
+  barcode?: string;
   name: string;
   description: string;
   purchasePrice: number;

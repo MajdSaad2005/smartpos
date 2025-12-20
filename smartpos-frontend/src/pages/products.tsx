@@ -86,6 +86,7 @@ export default function Products() {
 
   const columns = [
     { header: 'Code', accessor: 'code' as const },
+    { header: 'Barcode', accessor: 'barcode' as const },
     { header: 'Name', accessor: 'name' as const },
     { header: 'Supplier', accessor: 'supplierName' as const },
     { header: 'Sale Price', accessor: (row: Product) => formatCurrency(row.salePrice) },
@@ -103,6 +104,7 @@ export default function Products() {
               <h3 className="text-lg font-semibold mb-4">{editingId ? 'Edit Product' : 'Add Product'}</h3>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <Input label="Code" {...register('code', { required: true })} />
+                <Input label="Barcode (Optional)" placeholder="Scan or enter barcode" {...register('barcode')} />
                 <Input label="Name" {...register('name', { required: true })} />
                 <Input label="Description" {...register('description')} />
                 <Input label="Purchase Price" type="number" step="0.01" {...register('purchasePrice', { required: true })} />

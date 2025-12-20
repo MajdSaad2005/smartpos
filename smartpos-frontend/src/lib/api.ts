@@ -19,6 +19,7 @@ import {
   SalesReportDTO,
   ProductSalesStatsDTO,
   CustomerPurchaseSummaryDTO,
+  DashboardStats,
 } from '@/types/api';
 
 // Product APIs
@@ -26,6 +27,7 @@ export const productAPI = {
   getAll: () => apiClient.get<Product[]>('/v1/products'),
   getById: (id: number) => apiClient.get<Product>(`/v1/products/${id}`),
   getByCode: (code: string) => apiClient.get<Product>(`/v1/products/code/${code}`),
+  getByBarcode: (barcode: string) => apiClient.get<Product>(`/v1/products/barcode/${barcode}`),
   search: (searchTerm: string) => apiClient.get<Product[]>('/v1/products/search', { params: { searchTerm } }),
   create: (data: CreateProductRequest) => apiClient.post<Product>('/v1/products', data),
   update: (id: number, data: CreateProductRequest) => apiClient.put<Product>(`/v1/products/${id}`, data),
@@ -140,4 +142,10 @@ export const purchaseOrderAPI = {
   getByStatus: (status: string) => apiClient.get<PurchaseOrder[]>(`/v1/purchase-orders/status/${status}`),
   receive: (id: number) => apiClient.put<PurchaseOrder>(`/v1/purchase-orders/${id}/receive`),
   cancel: (id: number) => apiClient.put<void>(`/v1/purchase-orders/${id}/cancel`),
+};
+
+export const dashboardAPI = {
+  getStats: (days: number = 7) => apiClient.get<DashboardStats>('/v1/dashboard/stats', { params: { days } }),
+  getDailyStats: (days: number = 7) => apiClient.get<DashboardStats[]>('/v1/dashboard/daily', { params: { days } }),
+  getSessionStats: (sessionId: number) => apiClient.get<DashboardStats[]>(`/v1/dashboard/session/${sessionId}`),
 };

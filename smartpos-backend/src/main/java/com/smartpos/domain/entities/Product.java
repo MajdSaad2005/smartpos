@@ -23,6 +23,9 @@ public class Product {
     @Column(nullable = false, unique = true)
     private String code;
     
+    @Column(unique = true, length = 100)
+    private String barcode;
+    
     @Column(nullable = false)
     private String name;
     

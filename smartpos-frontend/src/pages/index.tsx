@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Layout, Header, Content } from '@/components/layout/Layout';
 import { Card, LoadingSpinner } from '@/components/common/FormElements';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { closeCashAPI, ticketAPI, productAPI } from '@/lib/api';
-import { CloseCash, Ticket, Product } from '@/types/api';
+import { closeCashAPI, ticketAPI, dashboardAPI } from '@/lib/api';
+import { CloseCash, Ticket } from '@/types/api';
 import { formatCurrency } from '@/lib/utils';
 
 export default function Dashboard() {
@@ -23,39 +23,25 @@ export default function Dashboard() {
   const fetchData = async (skipLoading = false) => {
     if (!skipLoading) setLoading(true);
     try {
+      // Get open cash session
       const { data: closeCashData } = await closeCashAPI.getPending();
       const openSession = closeCashData.find(s => s.closedAt === null);
       setCloseCash(openSession || null);
 
-      // Always show recent tickets (not dependent on cash session)
-      const { data: ticketsData } = await ticketAPI.getRecent(50);
-      setRecentTickets(ticketsData);
+      // Get recent tickets for the table display
+      const { data: allTicketsData } = await ticketAPI.getRecent(50);
+      setRecentTickets(allTicketsData);
 
-      const { data: products } = await productAPI.getAll();
-      const productById: Record<number, Product> = Object.fromEntries(products.map((p: Product) => [p.id, p]));
-
-      const totalSales = ticketsData.filter(t => t.type === 'SALE').reduce((sum, t) => sum + t.total, 0);
-      const totalReturns = ticketsData.filter(t => t.type === 'RETURN').reduce((sum, t) => sum + t.total, 0);
-
-      let netProfit = 0;
-      for (const t of ticketsData) {
-        for (const line of t.lines) {
-          const prod = productById[line.productId];
-          if (!prod) continue;
-          const sale = (prod.salePrice ?? line.unitPrice ?? 0);
-          const cost = (prod.purchasePrice ?? 0);
-          const marginPerUnit = sale - cost;
-          const lineProfit = marginPerUnit * line.quantity;
-          netProfit += t.type === 'SALE' ? lineProfit : -lineProfit;
-        }
-      }
-
+      // Fetch aggregated stats from the SQL view (v_dashboard_stats)
+      // This calculates all metrics in MySQL instead of JavaScript
+      const { data: dashboardStats } = await dashboardAPI.getStats(7);
+      
       setStats({
-        totalSales,
-        totalReturns,
-        netAmount: totalSales - totalReturns,
-        netProfit,
-        transactionCount: ticketsData.length,
+        totalSales: dashboardStats.totalSales || 0,
+        totalReturns: dashboardStats.totalReturns || 0,
+        netAmount: dashboardStats.netAmount || 0,
+        netProfit: dashboardStats.netProfit || 0,
+        transactionCount: dashboardStats.transactionCount || 0,
       });
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);

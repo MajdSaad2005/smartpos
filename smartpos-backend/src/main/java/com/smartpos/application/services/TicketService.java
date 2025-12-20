@@ -27,6 +27,7 @@ public class TicketService {
     private final CloseCashRepository closeCashRepository;
     private final CouponRepository couponRepository;
     private final DiscountRepository discountRepository;
+    private final TelegramNotificationService telegramNotificationService;
     
     /**
      * TRANSACTIONAL OPERATION #1: Create Ticket with Stock Update
@@ -259,6 +260,12 @@ public class TicketService {
         ticket.setStatus(Ticket.TicketStatus.COMPLETED);
         
         ticket = ticketRepository.save(ticket);
+        
+        // Send Telegram notification for sales (async, won't block transaction)
+        if (ticket.getType() == Ticket.TicketType.SALE) {
+            telegramNotificationService.notifySale(ticket, request.getLines().size());
+        }
+        
         return toDTO(ticket);
     }
     

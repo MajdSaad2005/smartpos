@@ -22,6 +22,7 @@ export default function Sales() {
   const [availableDiscounts, setAvailableDiscounts] = useState<Discount[]>([]);
   const [selectedDiscountId, setSelectedDiscountId] = useState<number | null>(null);
   const [recentTickets, setRecentTickets] = useState<Ticket[]>([]);
+  const [barcodeInput, setBarcodeInput] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -73,6 +74,30 @@ export default function Sales() {
       fetchRecentTickets();
     } catch (error: any) {
       toast.error(error.response?.data || 'Failed to recalculate ticket');
+    }
+  };
+
+  const searchByBarcode = async () => {
+    if (!barcodeInput.trim()) {
+      toast.error('Please enter a barcode');
+      return;
+    }
+
+    try {
+      const { data } = await productAPI.getByBarcode(barcodeInput);
+      setSelectedProductId(data.id);
+      setQuantity(1);
+      setBarcodeInput('');
+      toast.success(`Product found: ${data.name}`);
+    } catch (error: any) {
+      toast.error('Product not found with this barcode');
+      setBarcodeInput('');
+    }
+  };
+
+  const handleBarcodeKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      searchByBarcode();
     }
   };
 
@@ -252,6 +277,24 @@ export default function Sales() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Product Selection */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Barcode Scanner */}
+            <Card title="🔍 Quick Add by Barcode">
+              <div className="flex gap-2">
+                <Input
+                  label=""
+                  placeholder="Scan or enter barcode..."
+                  value={barcodeInput}
+                  onChange={(e) => setBarcodeInput(e.target.value)}
+                  onKeyPress={handleBarcodeKeyPress}
+                  className="flex-1"
+                />
+                <Button onClick={searchByBarcode} variant="primary" className="mt-0">
+                  Search
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">💡 Tip: Scan barcode or type and press Enter</p>
+            </Card>
+
             <Card title="Add Products">
               <div className="space-y-4">
                 <Select

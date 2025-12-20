@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class ProductDTO {
     private Long id;
     private String code;
+    private String barcode;
     private String name;
     private String description;
     private BigDecimal purchasePrice;

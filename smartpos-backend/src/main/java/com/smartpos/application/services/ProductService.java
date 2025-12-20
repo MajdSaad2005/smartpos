@@ -29,6 +29,7 @@ public class ProductService {
         
         Product product = Product.builder()
                 .code(request.getCode())
+                .barcode(request.getBarcode())
                 .name(request.getName())
                 .description(request.getDescription())
                 .purchasePrice(request.getPurchasePrice())
@@ -65,6 +66,13 @@ public class ProductService {
     }
     
     @Transactional(readOnly = true)
+    public ProductDTO getProductByBarcode(String barcode) {
+        Product product = productRepository.findByBarcode(barcode)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        return toDTO(product);
+    }
+    
+    @Transactional(readOnly = true)
     public List<ProductDTO> getAllActiveProducts() {
         return productRepository.findByActiveTrue().stream()
                 .map(this::toDTO)
@@ -87,6 +95,14 @@ public class ProductService {
                 throw new RuntimeException("Product code already exists");
             }
             product.setCode(request.getCode());
+        }
+        
+        // Update barcode if changed and not null
+        if (request.getBarcode() != null && !request.getBarcode().equals(product.getBarcode())) {
+            if (productRepository.findByBarcode(request.getBarcode()).isPresent()) {
+                throw new RuntimeException("Barcode already exists");
+            }
+            product.setBarcode(request.getBarcode());
         }
         
         product.setName(request.getName());
@@ -117,6 +133,7 @@ public class ProductService {
         return ProductDTO.builder()
                 .id(product.getId())
                 .code(product.getCode())
+                .barcode(product.getBarcode())
                 .name(product.getName())
                 .description(product.getDescription())
                 .purchasePrice(product.getPurchasePrice())

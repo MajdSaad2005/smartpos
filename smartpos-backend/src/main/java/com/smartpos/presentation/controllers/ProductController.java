@@ -38,6 +38,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductByCode(code));
     }
     
+    @GetMapping("/barcode/{barcode}")
+    @Operation(summary = "Get product by barcode")
+    public ResponseEntity<ProductDTO> getProductByBarcode(@PathVariable String barcode) {
+        return ResponseEntity.ok(productService.getProductByBarcode(barcode));
+    }
+    
     @GetMapping
     @Operation(summary = "Get all active products")
     public ResponseEntity<List<ProductDTO>> getAllActiveProducts() {
